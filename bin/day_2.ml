@@ -51,13 +51,13 @@ let parse_row row =
         parse_my_column @@ List.nth splitted 1 )
 
 let parse_rows rows =
-  List.fold_left
-    (fun cur_score row ->
-      let opponent_shape, expected_round_outcome = parse_row row in
-      let my_shape = get_hand_shape opponent_shape expected_round_outcome in
-      let round_outcome = play_round my_shape opponent_shape in
-      cur_score + round_outcome_score round_outcome + hand_shape_score my_shape)
-    0 rows
+  rows
+  |> List.map (fun row ->
+         let opponent_shape, expected_round_outcome = parse_row row in
+         let my_shape = get_hand_shape opponent_shape expected_round_outcome in
+         let round_outcome = play_round my_shape opponent_shape in
+         round_outcome_score round_outcome + hand_shape_score my_shape)
+  |> List.fold_left ( + ) 0
 
 let () =
   let score = read_lines input_path |> parse_rows in
