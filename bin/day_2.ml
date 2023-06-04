@@ -1,4 +1,5 @@
 open Printf
+open Lib
 
 let input_path = "./inputs/2.txt"
 
@@ -36,6 +37,11 @@ let parse_my_column = function
   | "Z" -> Win
   | _ -> failwith "invalid my column"
 
+let play_round my_shape opponent_shape =
+  match (my_shape, opponent_shape) with
+  | _ when my_shape = opponent_shape -> Draw
+  | _ -> if get_winner_shape opponent_shape = my_shape then Win else Lose
+
 let parse_row row =
   let splitted = String.split_on_char ' ' row in
   match List.length splitted with
@@ -44,22 +50,15 @@ let parse_row row =
       ( parse_opponent_column @@ List.nth splitted 0,
         parse_my_column @@ List.nth splitted 1 )
 
-let play_round my_shape opponent_shape =
-  match (my_shape, opponent_shape) with
-  | _ when my_shape = opponent_shape -> Draw
-  | _ -> if get_winner_shape opponent_shape = my_shape then Win else Lose
+let parse_rows rows =
+  List.fold_left
+    (fun cur_score row ->
+      let opponent_shape, expected_round_outcome = parse_row row in
+      let my_shape = get_hand_shape opponent_shape expected_round_outcome in
+      let round_outcome = play_round my_shape opponent_shape in
+      cur_score + round_outcome_score round_outcome + hand_shape_score my_shape)
+    0 rows
 
 let () =
-  let rows = Lib.read_lines input_path in
-  let score =
-    List.fold_left
-      (fun cur_score row ->
-        let opponent_shape, expected_round_outcome = parse_row row in
-        let my_shape = get_hand_shape opponent_shape expected_round_outcome in
-        let round_outcome = play_round my_shape opponent_shape in
-        cur_score
-        + round_outcome_score round_outcome
-        + hand_shape_score my_shape)
-      0 rows
-  in
-  print_endline @@ string_of_int score
+  let score = read_lines input_path |> parse_rows in
+  printf "%d\n" score

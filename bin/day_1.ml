@@ -1,3 +1,6 @@
+open Printf
+open Lib
+
 let input_path = "./inputs/1.txt"
 let n_elves = 3
 
@@ -6,9 +9,8 @@ let rec first_n n xs =
   | [] -> []
   | x :: xs -> if n = 1 then [ x ] else x :: first_n (n - 1) xs
 
-let () =
-  let lines = Lib.read_lines input_path in
-  let elf_calories, _ =
+let process_lines lines =
+  let result, _ =
     List.fold_left
       (fun (elf_calories, acc) line ->
         match line with
@@ -16,8 +18,12 @@ let () =
         | _ -> (elf_calories, acc + int_of_string line))
       ([], 0) lines
   in
-  let sorted_elf_calories = List.sort (fun a b -> b - a) elf_calories in
+  result
+
+let () =
   let calories =
-    first_n n_elves sorted_elf_calories |> List.fold_left ( + ) 0
+    read_lines input_path |> process_lines
+    |> List.sort (fun a b -> b - a)
+    |> first_n n_elves |> List.fold_left ( + ) 0
   in
-  print_endline @@ string_of_int calories
+  printf "%d\n" calories
